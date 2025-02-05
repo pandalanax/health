@@ -1,4 +1,4 @@
-module github.com/alexliesenfeld/health
+module github.com/pandalanax/health
 
 go 1.18
 
