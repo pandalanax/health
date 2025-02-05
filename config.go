@@ -183,10 +183,19 @@ func WithChecks(checks ...Check) CheckerOption {
 // actually calling the checked services too often or to execute long-running checks.
 // This way Checker.Check (and the health endpoint) always returns the last result of the periodic check.
 func WithPeriodicCheck(refreshPeriod time.Duration, initialDelay time.Duration, check Check) CheckerOption {
+	return WithPeriodicChecks(refreshPeriod, initialDelay, check)
+}
+
+// WithPeriodicChecks adds multiple periodic health checks that contribute to the overall service availability status.
+// These health checks will be performed on a fixed schedule and will not be executed for each HTTP request,
+// which helps reduce the load on dependent services.
+func WithPeriodicChecks(refreshPeriod time.Duration, initialDelay time.Duration, checks ...Check) CheckerOption {
 	return func(cfg *checkerConfig) {
-		check.updateInterval = refreshPeriod
-		check.initialDelay = initialDelay
-		cfg.checks[check.Name] = &check
+		for i := range checks {
+			checks[i].updateInterval = refreshPeriod
+			checks[i].initialDelay = initialDelay
+			cfg.checks[checks[i].Name] = &checks[i]
+		}
 	}
 }
 
